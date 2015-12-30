@@ -1,0 +1,13 @@
+<component name="libraryTable">
+  <library name="Maven: org.apache.hbase:hbase:0.90.1-cdh3u0">
+    <CLASSES>
+      <root url="jar://$MAVEN_REPOSITORY$/org/apache/hbase/hbase/0.90.1-cdh3u0/hbase-0.90.1-cdh3u0.jar!/" />
+    </CLASSES>
+    <JAVADOC>
+      <root url="jar://$MAVEN_REPOSITORY$/org/apache/hbase/hbase/0.90.1-cdh3u0/hbase-0.90.1-cdh3u0-javadoc.jar!/" />
+    </JAVADOC>
+    <SOURCES>
+      <root url="jar://$MAVEN_REPOSITORY$/org/apache/hbase/hbase/0.90.1-cdh3u0/hbase-0.90.1-cdh3u0-sources.jar!/" />
+    </SOURCES>
+  </library>
+</component>

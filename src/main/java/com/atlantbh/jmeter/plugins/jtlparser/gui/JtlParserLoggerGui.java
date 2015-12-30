@@ -13,7 +13,6 @@ import org.apache.jmeter.visualizers.gui.AbstractListenerGui;
 
 public class JtlParserLoggerGui extends AbstractListenerGui {
 
-    public static final String WIKIPAGE = "JtlParserLogger";
     private JTextField filename;
     private String lastPath = ".";
 
@@ -23,21 +22,24 @@ public class JtlParserLoggerGui extends AbstractListenerGui {
     }
 
     @Override
+    public void clearGui(){
+        super.clearGui();
+    }
+
+    @Override
     public String getStaticLabel() {
-        return "Jtl Parser Listener";
+        return "JTL Parser Listener";
     }
 
     @Override
     public String getLabelResource() {
-        return getClass().getCanonicalName();
+        return "JTL Parser Listener";
     }
 
     @Override
     public TestElement createTestElement() {
-        TestElement testElement = JtlParserLogger.getJtlParserLogger();
+        JtlParserLogger testElement = new JtlParserLogger();
         modifyTestElement(testElement);
-        System.out.println("Object Created: " + testElement.toString());
-        (new Throwable()).printStackTrace();
         return testElement;
     }
 
@@ -46,18 +48,19 @@ public class JtlParserLoggerGui extends AbstractListenerGui {
         super.configureTestElement(te);
         if (te instanceof JtlParserLogger ) {
             JtlParserLogger jtlParserLogger = (JtlParserLogger) te;
-            jtlParserLogger.setOuputFile(filename.getText());
+            jtlParserLogger.setOutputFile(filename.getText());
         }
     }
     @Override
     public void configure(TestElement testElement) {
         super.configure(testElement);
-        JtlParserLogger jtlParserLogger = (JtlParserLogger) testElement;
-        filename.setText(jtlParserLogger.getOutputFile());
+        if (testElement instanceof JtlParserLogger) {
+            JtlParserLogger jtlParserLogger = (JtlParserLogger) testElement;
+            filename.setText(jtlParserLogger.getOutputFile());
+        }
     }
 
-
-    private void init() {
+    public void init() {
         setLayout(new BorderLayout(0, 5));
         setBorder(makeBorder());
 

@@ -13,7 +13,6 @@ import org.apache.jmeter.samplers.SampleListener;
 import org.apache.jmeter.samplers.SampleResult;
 import org.apache.jmeter.testelement.TestStateListener;
 import com.atlantbh.jmeter.plugins.jtlparser.model.junit.*;
-import org.apache.jmeter.timers.SyncTimer;
 
 import java.io.PrintStream;
 import java.io.Serializable;
@@ -29,14 +28,22 @@ public class JtlParserLogger extends AbstractListenerElement
 
     private ArrayList<TestCase> testCases = new ArrayList<TestCase>();
     private PrintStream out;
-    private String outputFile = "";
-    public JtlParserLogger(){
+    private static final String OUTPUTFILE = "OUTPUTFILE";
+
+    public JtlParserLogger() {
         super();
     }
 
-    public static JtlParserLogger getJtlParserLogger() {
-        return new JtlParserLogger();
+    public void setOutputFile(String outputFile)
+    {
+        setProperty(OUTPUTFILE, outputFile);
     }
+
+    public String getOutputFile()
+    {
+        return getPropertyAsString(OUTPUTFILE);
+    }
+
     @Override
     public void sampleOccurred(SampleEvent sampleEvent) {
         TestCase testCase = getTestCase(sampleEvent);
@@ -75,22 +82,15 @@ public class JtlParserLogger extends AbstractListenerElement
         for (TestCase testCase : testCases)
             testSuite.addTestCase(testCase);
         testSuites.add(testSuite);
-        builder.writeXmlDoc(builder.generateXmlDoc(testSuites), outputFile);
+        System.out.println(testSuites.size());
+        System.out.println(getOutputFile());
+        builder.writeXmlDoc(builder.generateXmlDoc(testSuites), getOutputFile());
         System.out.println("Object Ended: " + this.toString());
     }
 
     @Override
     public void testEnded(String s) {
         testEnded();
-    }
-
-    public void setOuputFile(String file) {
-        outputFile = file;
-
-    }
-
-    public String getOutputFile() {
-        return outputFile;
     }
 
     private TestStep createTestStep(SampleResult sampleResult){
