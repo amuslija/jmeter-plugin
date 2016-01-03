@@ -8,12 +8,16 @@ import javax.swing.*;
 
 import com.atlantbh.jmeter.plugins.jtlparser.JtlParserLogger;
 import org.apache.jmeter.gui.GuiPackage;
+import org.apache.jmeter.gui.util.HorizontalPanel;
+import org.apache.jmeter.gui.util.VerticalPanel;
 import org.apache.jmeter.testelement.TestElement;
 import org.apache.jmeter.visualizers.gui.AbstractListenerGui;
+import org.apache.jorphan.gui.JLabeledTextField;
+import org.apache.jorphan.gui.layout.VerticalLayout;
 
 public class JtlParserLoggerGui extends AbstractListenerGui {
 
-    private JTextField filename;
+    private JLabeledTextField fileNameTextField;
     private String lastPath = ".";
 
     public JtlParserLoggerGui() {
@@ -48,7 +52,7 @@ public class JtlParserLoggerGui extends AbstractListenerGui {
         super.configureTestElement(te);
         if (te instanceof JtlParserLogger ) {
             JtlParserLogger jtlParserLogger = (JtlParserLogger) te;
-            jtlParserLogger.setOutputFile(filename.getText());
+            jtlParserLogger.setOutputFile(fileNameTextField.getText());
         }
     }
     @Override
@@ -56,48 +60,55 @@ public class JtlParserLoggerGui extends AbstractListenerGui {
         super.configure(testElement);
         if (testElement instanceof JtlParserLogger) {
             JtlParserLogger jtlParserLogger = (JtlParserLogger) testElement;
-            filename.setText(jtlParserLogger.getOutputFile());
+            fileNameTextField.setText(jtlParserLogger.getOutputFile());
         }
     }
-
     public void init() {
         setLayout(new BorderLayout(0, 5));
         setBorder(makeBorder());
+        add(makeTitlePanel(), BorderLayout.NORTH);
 
-        JPanel mainPanel = new JPanel(new GridBagLayout());
+        JPanel panel = new JPanel(new GridBagLayout());
+        panel.setBorder(BorderFactory.createEtchedBorder());
 
-        GridBagConstraints labelConstraints = new GridBagConstraints();
-        labelConstraints.anchor = GridBagConstraints.FIRST_LINE_END;
-
-        GridBagConstraints editConstraints = new GridBagConstraints();
-        editConstraints.anchor = GridBagConstraints.FIRST_LINE_START;
-        editConstraints.weightx = 1.0;
-        editConstraints.fill = GridBagConstraints.HORIZONTAL;
-
-        addToPanel(mainPanel, labelConstraints, 0, 1, new JLabel("Filename: ", JLabel.RIGHT));
-        addToPanel(mainPanel, editConstraints, 1, 1, filename = new JTextField(20));
         JButton browseButton = new JButton("Browse...");
-        addToPanel(mainPanel, labelConstraints, 2, 1, browseButton);
-        browseButton.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                JFileChooser chooser = new JFileChooser(lastPath);
-                if (chooser != null) {
-                    if(GuiPackage.getInstance() != null) {
-                        int returnVal = chooser.showOpenDialog(GuiPackage.getInstance().getMainFrame());
-                        if(returnVal == JFileChooser.APPROVE_OPTION) {
-                            filename.setText(chooser.getSelectedFile().getPath());
+        browseButton.addActionListener(new FileBrowserAction());
+        fileNameTextField = new JLabeledTextField("Filename");
 
-                        }
-                        lastPath = chooser.getCurrentDirectory().getPath();
+        GridBagConstraints gridBagConstraints = getGridBagConstraints();
+        panel.add(fileNameTextField, gridBagConstraints);
+        gridBagConstraints.gridx = 1;
+        panel.add(browseButton, gridBagConstraints);
+
+        add(panel);
+    }
+
+    private GridBagConstraints getGridBagConstraints() {
+        GridBagConstraints gridBagConstraints = new GridBagConstraints();
+        gridBagConstraints.anchor = GridBagConstraints.NORTH;
+        gridBagConstraints.fill = GridBagConstraints.HORIZONTAL;
+        gridBagConstraints.weightx = 1.0;
+        gridBagConstraints.weighty = 1.0;
+        gridBagConstraints.gridx = 0;
+        gridBagConstraints.gridy = 0;
+        return gridBagConstraints;
+    }
+
+    private class FileBrowserAction implements ActionListener {
+        @Override
+        public void actionPerformed(ActionEvent e) {
+            JFileChooser chooser = new JFileChooser(lastPath);
+            if (chooser != null) {
+                if(GuiPackage.getInstance() != null) {
+                    int returnVal = chooser.showOpenDialog(GuiPackage.getInstance().getMainFrame());
+                    if(returnVal == JFileChooser.APPROVE_OPTION) {
+                        fileNameTextField.setText(chooser.getSelectedFile().getPath());
                     }
+                    lastPath = chooser.getCurrentDirectory().getPath();
                 }
             }
-        });
+        }
 
-        JPanel container = new JPanel(new BorderLayout());
-        container.add(mainPanel, BorderLayout.NORTH);
-        add(container, BorderLayout.CENTER);
     }
 
     private void addToPanel(JPanel panel, GridBagConstraints constraints, int col, int row, JComponent component) {

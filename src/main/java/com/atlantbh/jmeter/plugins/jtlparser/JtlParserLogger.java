@@ -13,6 +13,7 @@ import org.apache.jmeter.samplers.SampleListener;
 import org.apache.jmeter.samplers.SampleResult;
 import org.apache.jmeter.testelement.TestStateListener;
 import com.atlantbh.jmeter.plugins.jtlparser.model.junit.*;
+import org.apache.jmeter.util.Document;
 
 import java.io.PrintStream;
 import java.io.Serializable;
@@ -66,7 +67,6 @@ public class JtlParserLogger extends AbstractListenerElement
         if (JMeter.isNonGUI()) {
             out = System.out;
         }
-        System.out.println("Object Started: " + this.toString());
     }
 
     @Override
@@ -77,15 +77,13 @@ public class JtlParserLogger extends AbstractListenerElement
     @Override
     public void testEnded() {
         JunitXmlBuilder builder = JunitXmlBuilder.newInstance();
-        ArrayList<TestSuite> testSuites = new ArrayList<TestSuite>();
         TestSuite testSuite = new TestSuite();
+        testSuite.setName("Jmeter Test Plan");
         for (TestCase testCase : testCases)
             testSuite.addTestCase(testCase);
-        testSuites.add(testSuite);
-        System.out.println(testSuites.size());
-        System.out.println(getOutputFile());
-        builder.writeXmlDoc(builder.generateXmlDoc(testSuites), getOutputFile());
-        System.out.println("Object Ended: " + this.toString());
+        org.w3c.dom.Document xmlOutput = builder.generateXmlDoc(testSuite);
+
+        builder.writeXmlDoc(xmlOutput, getOutputFile());
     }
 
     @Override

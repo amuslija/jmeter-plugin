@@ -9,10 +9,7 @@ import org.w3c.dom.Element;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
-import javax.xml.transform.OutputKeys;
-import javax.xml.transform.Transformer;
-import javax.xml.transform.TransformerException;
-import javax.xml.transform.TransformerFactory;
+import javax.xml.transform.*;
 import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
 import java.io.File;
@@ -39,21 +36,16 @@ public class JunitXmlBuilder {
         return builder;
     }
 
-    public Document generateXmlDoc(ArrayList<TestSuite> testSuites) {
+    public Document generateXmlDoc(TestSuite testSuite) {
         Document doc = null;
 
         try {
-            DocumentBuilderFactory docFactory = DocumentBuilderFactory.newInstance();
-            DocumentBuilder docBuilder = docFactory.newDocumentBuilder();
-            doc = docBuilder.newDocument();
-
+            doc = getDocument(doc);
             Element testSuitesElement = doc.createElement("testsuites");
             doc.appendChild(testSuitesElement);
 
-            for (TestSuite testSuite : testSuites) {
-                Element testSuiteElement = createTestSuiteElement(doc, testSuite);
-                testSuitesElement.appendChild(testSuiteElement);
-            }
+            Element testSuiteElement = createTestSuiteElement(doc, testSuite);
+            testSuitesElement.appendChild(testSuiteElement);
 
         } catch (ParserConfigurationException pce) {
             pce.printStackTrace();
@@ -61,22 +53,30 @@ public class JunitXmlBuilder {
         return doc;
     }
 
+    private Document getDocument(Document doc) throws ParserConfigurationException {
+        DocumentBuilderFactory docFactory = DocumentBuilderFactory.newInstance();
+        DocumentBuilder docBuilder = docFactory.newDocumentBuilder();
+        doc = docBuilder.newDocument();
+        return doc;
+    }
+
     public void writeXmlDoc(Document doc, String output) {
         try {
-            TransformerFactory transformerFactory = TransformerFactory.newInstance();
-            Transformer transformer = transformerFactory.newTransformer();
-            transformer.setOutputProperty(OutputKeys.INDENT, "yes");
-            transformer.setOutputProperty("{http://xml.apache.org/xslt}indent-amount", "2");
-
+            Transformer transformer = getTransformer();
             DOMSource source = new DOMSource(doc);
             StreamResult result = new StreamResult(new File(output));
-
             transformer.transform(source, result);
-
-
         } catch (TransformerException tfe) {
             tfe.printStackTrace();
         }
+    }
+
+    private Transformer getTransformer() throws TransformerConfigurationException {
+        TransformerFactory transformerFactory = TransformerFactory.newInstance();
+        Transformer transformer = transformerFactory.newTransformer();
+        transformer.setOutputProperty(OutputKeys.INDENT, "yes");
+        transformer.setOutputProperty("{http://xml.apache.org/xslt}indent-amount", "2");
+        return transformer;
     }
 
     private void appendTestCaseElements(ArrayList<Element> testCaseElements, Element testSuiteElement) {
