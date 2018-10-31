@@ -22,7 +22,7 @@ import org.apache.hadoop.mapred.JobID;
 import org.apache.hadoop.mapred.RunningJob;
 import org.apache.hadoop.mapred.Counters;
 import org.apache.hadoop.mapred.Counters.Counter;
-
+import lombok.Data;
 /**
  * This class exposes functionalities on Job layer. Those functionalities are:
  * 1. getJobCountersByJobId
@@ -31,48 +31,16 @@ import org.apache.hadoop.mapred.Counters.Counter;
  * 
  * @author Bakir Jusufbegovic / AtlantBH
  */
+@Data
 public class JobLayer {
-	
+
 	private static final long serialVersionUID = 1L;
+	public static final int PERCENTAGE_INT = 100;
 
 	private String jobId = "";
 	private String jobTracker = "";
 	private String jobState = "";
 	private String groupName = "";
-	
-	public JobLayer() {};
-	
-	public String getJobId() {
-		return jobId;
-	}
-	
-	public void setJobId(String jobId) {
-		this.jobId = jobId;
-	}
-	
-	public String getJobTracker() {
-		return jobTracker;
-	}
-	
-	public void setJobTracker(String jobTracker) {
-		this.jobTracker = jobTracker;
-	}
-	
-	public String getJobState() {
-		return jobState;
-	}
-	
-	public void setJobState(String jobState) {
-		this.jobState = jobState;
-	}
-	
-	public String getGroupName() {
-		return groupName;
-	}
-	
-	public void setGroupName(String groupName) {
-		this.groupName = groupName;
-	}	
 
 	public JobClient prepareJobClient(String jobTracker) throws IOException {
 		Configuration conf = new Configuration();
@@ -91,14 +59,13 @@ public class JobLayer {
 	
 	public String getCountersAsXml(Map<String, String> jobCounters) throws IOException {
 		
-		StringBuilder stBuilder = new StringBuilder();
-		stBuilder.append("<counters>\n");
-		
+		final StringBuilder stBuilder = new StringBuilder("<counters>\n");
+
 		for (Map.Entry<String,String> entry : jobCounters.entrySet())
-		{			
+		{
 			stBuilder.append(" <counter name=\"" + entry.getKey() + "\" value=\"" + entry.getValue() + "\"/>\n");
 		}
-		
+
 		stBuilder.append("</counters>\n");				
 		return stBuilder.toString();
 	}
@@ -153,26 +120,26 @@ public class JobLayer {
 	}
 	
 	public String getJobStatisticsByJobId(String jobTracker, String jobId) throws IOException {
-		StringBuilder jobStatistics = new StringBuilder();
-		
-		JobClient client = prepareJobClient(jobTracker);		
+
+		JobClient client = prepareJobClient(jobTracker);
 		JobID id = convertToJobId(jobId);
-		
+
 		RunningJob job = client.getJob(id);
-		
-		double mapProgress = job.mapProgress() * 100;
-		double reduceProgress = job.reduceProgress() * 100;
-		String mapPercentage = Double.toString(mapProgress) + "%";
-		String reducePercentage = Double.toString(reduceProgress) + "%";
-		
-		jobStatistics.append("<job id='"+ jobId +"'" + " name='"+ job.getJobName() +"'>\n");
-		jobStatistics.append(" <mapProgress>"+mapPercentage+"</mapProgress>\n");
-		jobStatistics.append(" <reduceProgress>"+reducePercentage+"</reduceProgress>\n");
-		jobStatistics.append(" <complete>"+job.isComplete()+"</complete>\n");
-		jobStatistics.append(" <successful>"+job.isSuccessful()+"</successful>\n");
-		jobStatistics.append(" <url>"+job.getTrackingURL()+"</url>\n");
-		jobStatistics.append("</job>");
+
+		StringBuilder jobStatistics = new StringBuilder();
+		jobStatistics.append("<job id='"+ jobId +"'" + " name='"+ job.getJobName() +"'>\n")
+		.append(" <mapProgress>"+ getPercentage(job.mapProgress()) +"</mapProgress>\n")
+		.append(" <reduceProgress>"+ getPercentage(job.reduceProgress()) +"</reduceProgress>\n")
+		.append(" <complete>"+ job.isComplete() +"</complete>\n")
+		.append(" <successful>"+ job.isSuccessful() +"</successful>\n")
+		.append(" <url>"+ job.getTrackingURL() +"</url>\n")
+		.append("</job>");
 		
 		return jobStatistics.toString();
 	}
+
+	private String getPercentage(float value) {
+		return Double.toString(value * PERCENTAGE_INT) + "%";
+	}
+
 }
